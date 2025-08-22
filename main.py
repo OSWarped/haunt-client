@@ -38,20 +38,34 @@ def status():
     })
 
 
-@app.route("/play", methods=["POST"])
-def play():
-    mp3 = request.args.get("file")
-    path = os.path.join(SOUND_FOLDER, mp3)
-    if not os.path.exists(path):
-        return f"File not found: {mp3}", 404
+@app.route("/api/play", methods=["POST"])
+def play_sound():
+    data = request.json
+    sound_file = data.get("sound_file")
+    sound_path = os.path.join("sounds", sound_file)
 
-    subprocess.call(["pkill", "mpg123"])  # stop current audio
-    subprocess.Popen(["mpg123", "-f", str(config["volume"] * 100), path])
-    return f"Playing {mp3}", 200
+    if os.path.exists(sound_path):
+        print(f"🔊 Playing sound: {sound_file}")
+        os.system(f"mpg123 '{sound_path}' &")
+        return jsonify({"status": "playing"}), 200
+    else:
+        return jsonify({"error": "Sound not found"}), 404
 
 @app.route("/test")
 def test():
     return play()
+    
+def check_for_commands():
+    try:
+        url = f"{SERVER_URL}/api/commands/{DEVICE_ID}"
+        response = requests.get(url, timeout=3)
+        if response.status_code == 200:
+            commands = response.json().get("commands", [])
+            for cmd in commands:
+                if cmd["command"] == "play":
+                    play_sound(cmd["filename"])
+    except Exception as e:
+        print(f"❌ Error checking for commands: {e}")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

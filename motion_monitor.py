@@ -1,9 +1,16 @@
-import RPi.GPIO as GPIO
+
 import json
 import time
 import threading
 import requests
 from datetime import datetime
+
+import platform
+
+if platform.system() == "Darwin":  # macOS
+    from mock_gpio import GPIO
+else:
+    import RPi.GPIO as GPIO
 
 # Load config
 with open("device.json") as f:
@@ -30,13 +37,18 @@ def send_motion_event(pin):
 
     try:
         url = f"{SERVER_URL}/api/motion"
+        print(f"➡️ Sending motion event to: {url}")
+        print(f"📦 Payload: {data}")
         response = requests.post(url, json=data, timeout=3)
+        print(f"⬅️ Response: {response.status_code} - {response.text}")
+
         if response.status_code == 200:
             print(f"📡 Motion detected on GPIO {pin} — reported successfully.")
         else:
             print(f"⚠️ Failed to report motion on GPIO {pin}: {response.status_code}")
     except Exception as e:
         print(f"❌ Error sending motion event: {e}")
+
 
 def motion_detected_callback(pin):
     print(f"👻 Motion detected on GPIO {pin}")
