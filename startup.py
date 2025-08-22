@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import time
 import register
 import motion_monitor
 
@@ -15,7 +16,7 @@ if os.path.exists(BOOT_CONFIG) and not os.path.exists(LOCAL_CONFIG):
 
 # Step 2: Pair with Bluetooth speaker
 print("🔗 Pairing with Bluetooth speaker...")
-#subprocess.call(["python3", "bluetooth_pair.py"])
+subprocess.call(["python3", "bluetooth_setup.py"])
 
 # Step 3: Setup motion monitors
 print("📡 Starting Motion Sensor Monitoring...")

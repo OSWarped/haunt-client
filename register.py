@@ -1,4 +1,5 @@
 import json
+import netifaces
 import subprocess
 import socket
 import requests
@@ -17,9 +18,11 @@ def is_speaker_connected(mac):
 
 def get_local_ip():
     try:
-        hostname = socket.gethostname()
-        return socket.gethostbyname(hostname)
-    except:
+        iface_data = netifaces.ifaddresses('wlan0')
+        ip_info = iface_data[netifaces.AF_INET][0]
+        return ip_info['addr']
+    except Exception as e:
+        print(f"[Error] Could not retrieve IP for wlan0: {e}")
         return "unknown"
 
 def register_with_server():
