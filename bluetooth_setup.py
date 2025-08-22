@@ -3,6 +3,8 @@ import time
 import json
 import os
 
+
+
 def run_command(cmd):
     try:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -10,6 +12,10 @@ def run_command(cmd):
     except Exception as e:
         print(f"[Error] Failed to run command: {cmd}\n{e}")
         return ""
+
+def start_pulseaudio():
+    print("🌀 Starting PulseAudio service...")
+    run_command("pulseaudio --start")
 
 def wait_for_bluetooth(timeout=30):
     print("⏳ Waiting for Bluetooth interface...")
@@ -73,6 +79,7 @@ def setup_bluetooth_speaker():
 
     if not wait_for_bluetooth():
         return
+    start_pulseaudio()  
     if not wait_for_pulseaudio():
         return
     if connect_speaker(mac):
